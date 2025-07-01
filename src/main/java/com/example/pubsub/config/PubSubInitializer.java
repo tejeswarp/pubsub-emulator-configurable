@@ -46,25 +46,50 @@ public class PubSubInitializer {
                              .setCredentialsProvider(NoCredentialsProvider.create())
                              .build())) {
 
-            ProjectTopicName topicName = ProjectTopicName.of(properties.getProjectId(), properties.getTopicId());
-            ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
-                    properties.getProjectId(), properties.getSubscriptionId());
+            // Create all required topics
+            createTopicIfNotExists(topicAdminClient, properties.getTopicId());
+            createTopicIfNotExists(topicAdminClient, properties.getUploadDocStatusTopic());
+            createTopicIfNotExists(topicAdminClient, properties.getUploadDocRetryTopic());
 
+            // Create subscription to main topic
+            createSubscriptionIfNotExists(subscriptionAdminClient, properties.getSubscriptionId(), properties.getTopicId());
+        } finally {
+            channel.shutdownNow(); // Clean up to avoid leak warning
+        }
+    }
+
+    private void createTopicIfNotExists(TopicAdminClient client, String topicId) {
+        ProjectTopicName topicName = ProjectTopicName.of(properties.getProjectId(), topicId);
+        try {
+            client.getTopic(topicName);
+            System.out.println("Topic already exists: " + topicId);
+        } catch (Exception e) {
             try {
-                topicAdminClient.createTopic(topicName);
-            } catch (Exception e) {
-                System.out.println("Topic exists or error: " + e.getMessage());
+                client.createTopic(topicName);
+                System.out.println("Created topic: " + topicId);
+            } catch (Exception ex) {
+                System.out.println("Could not create topic: " + topicId + " - " + ex.getMessage());
             }
+        }
+    }
 
+    private void createSubscriptionIfNotExists(SubscriptionAdminClient client, String subId, String topicId) {
+        ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(properties.getProjectId(), subId);
+        ProjectTopicName topicName = ProjectTopicName.of(properties.getProjectId(), topicId);
+        try {
+            client.getSubscription(subscriptionName);
+            System.out.println("Subscription already exists: " + subId);
+        } catch (Exception e) {
             try {
-                subscriptionAdminClient.createSubscription(
+                client.createSubscription(
                         subscriptionName,
                         topicName,
                         PushConfig.getDefaultInstance(),
                         10
                 );
-            } catch (Exception e) {
-                System.out.println("Subscription exists or error: " + e.getMessage());
+                System.out.println("Created subscription: " + subId);
+            } catch (Exception ex) {
+                System.out.println("Could not create subscription: " + subId + " - " + ex.getMessage());
             }
         }
     }

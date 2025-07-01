@@ -5,5 +5,19 @@ spring:
 pubsub:
   emulator-host: localhost:8681
   project-id: demo-project
-  topic-id: test-topic
+  topic-id: upload-doc-topic
   subscription-id: test-subscription
+  upload-doc-status-topic: upload-doc-status-topic
+  upload-doc-retry-topic: upload-doc-retry-topic
+  max-retries: 3
+
+resilience4j:
+  retry:
+    instances:
+      filenetService:
+        max-attempts: 3         # 1 original try + 2 retries
+        wait-duration: 1s       # wait between attempts
+        retry-exceptions:
+          - java.lang.RuntimeException  # Only retry on these
+        fail-after-max-attempts: true   # stop after 3rd fail
+        ignore-exceptions: []           # nothing ignored
