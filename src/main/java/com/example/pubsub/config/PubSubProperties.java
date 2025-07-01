@@ -14,6 +14,7 @@ public class PubSubProperties {
     private String uploadDocStatusTopic;
     private String uploadDocRetryTopic;
     private int maxRetries;
+    private String uploadDocStatusSubscription;
 
     public String getEmulatorHost() { return emulatorHost; }
     public void setEmulatorHost(String emulatorHost) { this.emulatorHost = emulatorHost; }
@@ -35,4 +36,12 @@ public class PubSubProperties {
 
     public int getMaxRetries() { return maxRetries; }
     public void setMaxRetries(int maxRetries) { this.maxRetries = maxRetries; }
+
+    public String getUploadDocStatusSubscription() {
+        return uploadDocStatusSubscription;
+    }
+
+    public void setUploadDocStatusSubscription(String uploadDocStatusSubscription) {
+        this.uploadDocStatusSubscription = uploadDocStatusSubscription;
+    }
 }

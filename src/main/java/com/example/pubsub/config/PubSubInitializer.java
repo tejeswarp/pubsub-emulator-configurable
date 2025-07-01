@@ -51,8 +51,9 @@ public class PubSubInitializer {
             createTopicIfNotExists(topicAdminClient, properties.getUploadDocStatusTopic());
             createTopicIfNotExists(topicAdminClient, properties.getUploadDocRetryTopic());
 
-            // Create subscription to main topic
+            // Create subscription to main & status topic
             createSubscriptionIfNotExists(subscriptionAdminClient, properties.getSubscriptionId(), properties.getTopicId());
+            createSubscriptionIfNotExists(subscriptionAdminClient, properties.getUploadDocStatusSubscription(), properties.getUploadDocStatusTopic());
         } finally {
             channel.shutdownNow(); // Clean up to avoid leak warning
         }

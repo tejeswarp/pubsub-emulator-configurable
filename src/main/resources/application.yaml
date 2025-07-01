@@ -7,6 +7,7 @@ pubsub:
   project-id: demo-project
   topic-id: upload-doc-topic
   subscription-id: test-subscription
+  upload-doc-status-subscription: upload-doc-status-sub
   upload-doc-status-topic: upload-doc-status-topic
   upload-doc-retry-topic: upload-doc-retry-topic
   max-retries: 3
