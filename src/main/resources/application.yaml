@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: pubsub-emulator-configurable
+
+pubsub:
+  emulator-host: localhost:8681
+  project-id: demo-project
+  topic-id: test-topic
+  subscription-id: test-subscription
