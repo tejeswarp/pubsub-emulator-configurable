@@ -15,10 +15,39 @@ pubsub:
 resilience4j:
   retry:
     instances:
-      filenetService:
+      filenetRetry:
         max-attempts: 3         # 1 original try + 2 retries
         wait-duration: 1s       # wait between attempts
         retry-exceptions:
           - java.lang.RuntimeException  # Only retry on these
         fail-after-max-attempts: true   # stop after 3rd fail
         ignore-exceptions: []           # nothing ignored
+  circuitbreaker:
+    instances:
+      filenetCB:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 5
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+
+# Spring Boot Actuator + Micrometer
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, circuitbreakers, circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+
+
+
+
+
+
