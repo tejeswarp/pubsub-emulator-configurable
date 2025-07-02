@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -79,11 +80,14 @@ public class PubSubController {
 
                 publisher = Publisher.newBuilder(topicName)
                         .setChannelProvider(channelProvider)              // required for emulator
-                        .setCredentialsProvider(NoCredentialsProvider.create()) // avoid GCP auth
+                        .setCredentialsProvider(NoCredentialsProvider.create())
+                        .setEnableMessageOrdering(true)// avoid GCP auth
                         .build();
 
                 PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
-                        .setData(ByteString.copyFromUtf8(json))
+                        .setMessageId(UUID.randomUUID().toString())               // Optional (for idempotency)
+                        .setOrderingKey(request.getPartyId())                    // Ordering key (for ordered delivery)
+                        .setData(ByteString.copyFromUtf8(json))                  // Your actual message data
                         .build();
 
                 publisher.publish(pubsubMessage).get();  // Waits for the future to complete

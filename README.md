@@ -22,3 +22,17 @@ docker run -d -p 8681:8681 --name pubsub-emulator google/cloud-sdk:latest gcloud
 Method: POST
 
 URL: http://localhost:8080/api/pubsub/publish-message?message=HelloSubscriber1
+
+### Testing the Pub-Sub with JSON
+
+Method: POST
+
+URL: http://localhost:8080/api/pubsub/upload-doc
+
+BODY:
+{
+"partyId": "P123",
+"fileName": "document.pdf"
+}
+
+

@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 @Service
 public class SubscriberService {
 
@@ -93,10 +95,13 @@ public class SubscriberService {
             publisher = Publisher.newBuilder(topicName)
                     .setChannelProvider(channelProvider)              // required for emulator
                     .setCredentialsProvider(NoCredentialsProvider.create()) // avoid GCP auth
+                    .setEnableMessageOrdering(true)
                     .build();
 
             String json = "{\"partyId\": \"" + partyId + "\", \"fileNetId\": \"" + fileNetId + "\"}";
             publisher.publish(PubsubMessage.newBuilder()
+                    .setMessageId(UUID.randomUUID().toString())
+                    .setOrderingKey(partyId)
                     .setData(ByteString.copyFromUtf8(json))
                     .build()).get();
             System.out.println("FileNetId published to status topic successfully: ");
@@ -113,6 +118,7 @@ public class SubscriberService {
 
     private void publishRetry(String jsonPayload) {
         try {
+            UploadDocRequest request = objectMapper.readValue(jsonPayload, UploadDocRequest.class);
             ProjectTopicName topicName = ProjectTopicName.of(
                     properties.getProjectId(), properties.getUploadDocRetryTopic());
 
@@ -133,9 +139,12 @@ public class SubscriberService {
                 publisher = Publisher.newBuilder(topicName)
                         .setChannelProvider(channelProvider)              // required for emulator
                         .setCredentialsProvider(NoCredentialsProvider.create()) // avoid GCP auth
+                        .setEnableMessageOrdering(true)
                         .build();
 
                 publisher.publish(PubsubMessage.newBuilder()
+                        .setMessageId(UUID.randomUUID().toString())
+                                .setOrderingKey(request.getPartyId())
                         .setData(ByteString.copyFromUtf8(jsonPayload))
                         .build()).get();
                 System.out.println("File published to retry topic successfully: ");
